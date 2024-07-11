@@ -1,4 +1,4 @@
-package com.rainworldmod.mechanics;
+package com.rainworldmod.mechanics.cycle;
 
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.World;

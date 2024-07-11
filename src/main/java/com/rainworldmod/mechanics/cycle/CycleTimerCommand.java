@@ -1,4 +1,4 @@
-package com.rainworldmod.mechanics;
+package com.rainworldmod.mechanics.cycle;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -18,18 +18,19 @@ public class CycleTimerCommand {
                         .then(literal("minCycleTime")
                                 .then(literal("query")
                                         .executes(context -> {
-                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
-                                            return worldTimer.minimumCycleTime;
+                                            final CycleTimer cycleTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
+                                            context.getSource().sendMessage(Text.literal("The current minimumCycleTime is " + cycleTimer.minimumCycleTime));
+                                            return cycleTimer.minimumCycleTime;
                                         }))
                                 .then(argument("time", TimeArgumentType.time())
                                         .executes(context -> {
                                             final int ticks = IntegerArgumentType.getInteger(context, "time");
-                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
+                                            final CycleTimer cycleTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
 
-                                            worldTimer.minimumCycleTime = ticks;
-                                            worldTimer.markDirty();
+                                            cycleTimer.minimumCycleTime = ticks;
+                                            cycleTimer.markDirty();
 
-                                            if (ticks > worldTimer.maximumCycleTime) {
+                                            if (ticks > cycleTimer.maximumCycleTime) {
                                                 context.getSource().sendError(Text.literal("Unable to set minimumCycleTime higher than maximumCycleTime!"));
                                                 return -ticks;
                                             }
@@ -45,18 +46,19 @@ public class CycleTimerCommand {
                         .then(literal("maxCycleTime")
                                 .then(literal("query")
                                         .executes(context -> {
-                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
-                                            return worldTimer.maximumCycleTime;
+                                            final CycleTimer cycleTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
+                                            context.getSource().sendMessage(Text.literal("The current maximumCycleTime is " + cycleTimer.maximumCycleTime));
+                                            return cycleTimer.maximumCycleTime;
                                         }))
                                 .then(argument("time", TimeArgumentType.time())
                                         .executes(context -> {
                                             final int ticks = IntegerArgumentType.getInteger(context, "time");
-                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
+                                            final CycleTimer cycleTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
 
-                                            worldTimer.maximumCycleTime = ticks;
-                                            worldTimer.markDirty();
+                                            cycleTimer.maximumCycleTime = ticks;
+                                            cycleTimer.markDirty();
 
-                                            if (worldTimer.minimumCycleTime > ticks) {
+                                            if (cycleTimer.minimumCycleTime > ticks) {
                                                 context.getSource().sendError(Text.literal("Unable to set maximumCycleTime lower than minimumCycleTime!"));
                                                 return -ticks;
                                             }
@@ -76,11 +78,11 @@ public class CycleTimerCommand {
                                                 .executes(context -> {
                                                     final int minTicks = IntegerArgumentType.getInteger(context, "minTime");
                                                     final int maxTicks = IntegerArgumentType.getInteger(context, "maxTime");
-                                                    final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
+                                                    final CycleTimer cycleTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
 
-                                                    worldTimer.minimumCycleTime = minTicks;
-                                                    worldTimer.maximumCycleTime = maxTicks;
-                                                    worldTimer.markDirty();
+                                                    cycleTimer.minimumCycleTime = minTicks;
+                                                    cycleTimer.maximumCycleTime = maxTicks;
+                                                    cycleTimer.markDirty();
 
                                                     if (minTicks > maxTicks) {
                                                         context.getSource().sendError(Text.literal("Unable to set maximumCycleTime lower than minimumCycleTime!"));
@@ -102,8 +104,8 @@ public class CycleTimerCommand {
                         .requires(context -> context.hasPermissionLevel(2))
                         .executes(context -> {
                             final World world = context.getSource().getWorld();
-                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(world.getRegistryKey());
-                            worldTimer.SelectNextRainTime(world);
+                            final CycleTimer cycleTimer = CycleTimer.getCycleTimer(world.getRegistryKey());
+                            cycleTimer.selectNextCycleLength(world);
                             return 1;
                         }))));
     }

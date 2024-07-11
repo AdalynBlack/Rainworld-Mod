@@ -1,6 +1,7 @@
 package com.rainworldmod.mixin;
 
-import com.rainworldmod.mechanics.CycleTimer;
+import com.rainworldmod.mechanics.cycle.CycleTimer;
+import com.rainworldmod.mechanics.sun.SunAnimator;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -35,24 +36,23 @@ public abstract class TickTime extends World {
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;setTimeOfDay(J)V"))
     protected void tickTime(ServerWorld instance, long timeOfDay)
     {
-        CycleTimer worldTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
+        CycleTimer cycleTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
 
-        if (worldTimer == null)
+        if (cycleTimer == null)
             return;
 
-
-        long currentTimeOfDay = (long) (worldTimer.getTimePercentage() * 12000);
+        long currentTimeOfDay = SunAnimator.getSimulatedTimeOfDay(cycleTimer.getTimePercentage());
         this.worldProperties.setTimeOfDay(currentTimeOfDay);
     }
 
     @Inject(method = "setTimeOfDay(J)V", at = @At("HEAD"))
     protected void setTimeOfDay(long timeOfDay, CallbackInfo info)
     {
-        CycleTimer worldTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
+        CycleTimer cycleTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
 
-        if (worldTimer == null)
+        if (cycleTimer == null)
             return;
 
-        worldTimer.cycleTimeLeft = (long) (worldTimer.cycleLength * (1 - (((float)timeOfDay / 12000) % 2)));
+        cycleTimer.cycleTimeLeft = (long) (cycleTimer.cycleLength * (1 - (((float)timeOfDay / 12000) % 2)));
     }
 }

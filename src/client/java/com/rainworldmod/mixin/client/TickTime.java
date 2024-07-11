@@ -1,6 +1,7 @@
 package com.rainworldmod.mixin.client;
 
-import com.rainworldmod.mechanics.CycleTimer;
+import com.rainworldmod.mechanics.cycle.CycleTimer;
+import com.rainworldmod.mechanics.sun.SunAnimator;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
@@ -35,7 +36,7 @@ public abstract class TickTime extends World {
         if (cycleTimer == null)
             return;
 
-        long currentTimeOfDay = (long) (cycleTimer.getTimePercentage() * 12000);
+        long currentTimeOfDay = SunAnimator.getSimulatedTimeOfDay(cycleTimer.getTimePercentage());
         this.clientWorldProperties.setTimeOfDay(currentTimeOfDay);
     }
 
@@ -50,6 +51,6 @@ public abstract class TickTime extends World {
         long timeDelta = timeOfDay - this.getTimeOfDay();
 
         timeDelta = cycleTimer.convertToRW(timeDelta);
-        cycleTimer.advanceRainTimer(timeDelta);
+        cycleTimer.advanceCycleTimer(timeDelta);
     }
 }

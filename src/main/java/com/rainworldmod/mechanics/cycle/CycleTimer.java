@@ -1,6 +1,7 @@
-package com.rainworldmod.mechanics;
+package com.rainworldmod.mechanics.cycle;
 
 import com.rainworldmod.RainworldMod;
+import com.rainworldmod.mechanics.rain.RainTicker;
 import com.rainworldmod.networking.SyncCycleTimer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -17,9 +18,11 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 import net.minecraft.world.World;
-import net.minecraft.world.level.ServerWorldProperties;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.function.Supplier;
 
 public class CycleTimer extends PersistentState {
     public int cycleLength;
@@ -28,6 +31,9 @@ public class CycleTimer extends PersistentState {
     public int maximumCycleTime;
 
     public RegistryKey<World> world;
+
+    private static final List<Supplier<CycleTicker>> cycleTickerProviders = List.of(RainTicker::new);
+    public List<CycleTicker> cycleTickers = new ArrayList<>(cycleTickerProviders.size());
 
     private boolean firstTimeSetHappened = false;
 
@@ -42,6 +48,10 @@ public class CycleTimer extends PersistentState {
         this.cycleTimeLeft = cycleTimeLeft;
         this.minimumCycleTime = minimumCycleTime;
         this.maximumCycleTime = maximumCycleTime;
+
+        cycleTickerProviders.forEach((cycleTickerSupplier -> {
+            cycleTickers.add(cycleTickerSupplier.get());
+        }));
     }
 
     public float getTimePercentage()
@@ -51,18 +61,6 @@ public class CycleTimer extends PersistentState {
 
     public static CycleTimer getCycleTimer(RegistryKey<World> world) {
         return CYCLE_TIMERS.get(world);
-    }
-
-    public void advanceRainTimer(long rwTimeDelta)
-    {
-        if (!firstTimeSetHappened) {
-            firstTimeSetHappened = true;
-            return;
-        }
-
-        this.cycleTimeLeft += rwTimeDelta;
-
-        this.markDirty();
     }
 
     public float getTimeMultiplier()
@@ -80,7 +78,18 @@ public class CycleTimer extends PersistentState {
         return (long) (rwTime * getTimeMultiplier());
     }
 
-    public void SelectNextRainTime(World world) {
+    public void advanceCycleTimer(long rwTimeDelta)
+    {
+        if (!firstTimeSetHappened) {
+            firstTimeSetHappened = true;
+            return;
+        }
+
+        this.cycleTimeLeft += rwTimeDelta;
+        this.markDirty();
+    }
+
+    public void selectNextCycleLength(World world) {
         this.cycleLength = world.getRandom().nextBetween(minimumCycleTime, maximumCycleTime);
         this.cycleTimeLeft = this.cycleLength;
 
@@ -88,50 +97,34 @@ public class CycleTimer extends PersistentState {
     }
 
     private static void worldStartTick(World world) {
-        CycleTimer worldTimer = CYCLE_TIMERS.get(world.getRegistryKey());
-        if (worldTimer.getTimePercentage() > 1.5)
+        CycleTimer cycleTimer = CYCLE_TIMERS.get(world.getRegistryKey());
+        if (cycleTimer.getTimePercentage() > 1.5)
             return;
         if (!world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE))
             return;
-        //if (!world.getTick().shouldTick())
-        //    return;
 
-        worldTimer.cycleTimeLeft--;
+        cycleTimer.cycleTimeLeft--;
 
-        worldTimer.markDirty();
+        cycleTimer.markDirty();
 
-        if (world.isClient)
-            return;
-
-        if (worldTimer.cycleTimeLeft < 0) {
-            world.getLevelProperties().setRaining(true);
-            ((ServerWorldProperties) (world.getLevelProperties())).setThundering(true);
-        }
-        else if (worldTimer.getTimePercentage() > 0.95) {
-            world.getLevelProperties().setRaining(true);
-            ((ServerWorldProperties) (world.getLevelProperties())).setThundering(false);
-        }
-        else {
-            world.getLevelProperties().setRaining(false);
-            ((ServerWorldProperties) (world.getLevelProperties())).setThundering(false);
-        }
+        cycleTimer.cycleTickers.forEach(cycleTicker -> {
+            cycleTicker.onCycleTick(cycleTimer, world);
+        });
     }
-
-    /*
-    private static final Type<WorldTimer> TYPE = new Type<>(
-            WorldTimer::new,
-            WorldTimer::createFromNbt,
-            null
-    );
-     */
 
     public static CycleTimerRequester cycleTimerRequester;
 
+    public static void initialize() {
+        ServerWorldEvents.LOAD.register(CycleTimer::load);
+        ServerWorldEvents.UNLOAD.register(CycleTimer::unload);
+        ServerTickEvents.START_WORLD_TICK.register(CycleTimer::worldStartTick);
+    }
+
     private static void load(MinecraftServer minecraftServer, World world) {
-        CycleTimer worldTimer = null;
+        CycleTimer cycleTimer;
 
         if (world.isClient) {
-            worldTimer = new CycleTimer();
+            cycleTimer = new CycleTimer();
 
             if (cycleTimerRequester != null)
                 cycleTimerRequester.requestCycleTimer(world.getRegistryKey());
@@ -139,28 +132,22 @@ public class CycleTimer extends PersistentState {
             ServerWorld serverWorld = (ServerWorld) world;
 
             PersistentStateManager persistentStateManager = serverWorld.getPersistentStateManager();
-            worldTimer = persistentStateManager.getOrCreate(CycleTimer::createFromNbt, CycleTimer::new, RainworldMod.MOD_ID);
+            cycleTimer = persistentStateManager.getOrCreate(CycleTimer::createFromNbt, CycleTimer::new, RainworldMod.MOD_ID);
 
-            if (worldTimer.cycleLength == -1)
-                worldTimer.SelectNextRainTime(serverWorld);
+            if (cycleTimer.cycleLength == -1)
+                cycleTimer.selectNextCycleLength(serverWorld);
 
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeRegistryKey(world.getRegistryKey());
-            buf.writeInt(worldTimer.cycleLength);
-            buf.writeLong(worldTimer.cycleTimeLeft);
+            buf.writeInt(cycleTimer.cycleLength);
+            buf.writeLong(cycleTimer.cycleTimeLeft);
 
             for (ServerPlayerEntity player : PlayerLookup.world(serverWorld))
-                ServerPlayNetworking.send(player, SyncCycleTimer.SYNC_CYCLE_TIMER_PACKET_ID, new SyncCycleTimer(world.getRegistryKey(), worldTimer.cycleLength, worldTimer.cycleTimeLeft).toBuf());
+                ServerPlayNetworking.send(player, SyncCycleTimer.SYNC_CYCLE_TIMER_PACKET_ID, new SyncCycleTimer(world.getRegistryKey(), cycleTimer.cycleLength, cycleTimer.cycleTimeLeft).toBuf());
         }
 
-        CYCLE_TIMERS.put(world.getRegistryKey(), worldTimer);
-        worldTimer.world = world.getRegistryKey();
-    }
-
-    public static void initialize() {
-        ServerWorldEvents.LOAD.register(CycleTimer::load);
-        ServerWorldEvents.UNLOAD.register(CycleTimer::unload);
-        ServerTickEvents.START_WORLD_TICK.register(CycleTimer::worldStartTick);
+        CYCLE_TIMERS.put(world.getRegistryKey(), cycleTimer);
+        cycleTimer.world = world.getRegistryKey();
     }
 
     private static void unload(MinecraftServer minecraftServer, ServerWorld world) {
