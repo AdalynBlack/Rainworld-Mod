@@ -13,6 +13,14 @@ public class Easing {
         return value;
     }
 
+    public static double easeInOutQuadratic(double normalizedProgress)
+    {
+        if (normalizedProgress < 0.5)
+            return 2 * normalizedProgress * normalizedProgress;
+        normalizedProgress = -2 * normalizedProgress + 2;
+        return 1 - (normalizedProgress * normalizedProgress) / 2;
+    }
+
     public static double easeOutCubic(double normalizedProgress)
     {
         if (normalizedProgress >= 1)
@@ -28,7 +36,8 @@ public class Easing {
     {
         if (normalizedProgress < 0.5)
             return 4 * normalizedProgress * normalizedProgress * normalizedProgress;
-        return 1 - Math.pow(-2 * normalizedProgress + 2, 3) / 2;
+        normalizedProgress = -2 * normalizedProgress + 2;
+        return 1 - (normalizedProgress * normalizedProgress * normalizedProgress) / 2;
     }
 
     private static final double BOUNCE_FACTOR_MULTIPLIER = 7.5625;
