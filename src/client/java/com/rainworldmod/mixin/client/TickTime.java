@@ -1,7 +1,6 @@
 package com.rainworldmod.mixin.client;
 
-import com.rainworldmod.mechanics.WorldTimer;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import com.rainworldmod.mechanics.CycleTimer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
@@ -31,26 +30,26 @@ public abstract class TickTime extends World {
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;setTimeOfDay(J)V"))
     protected void tickTime(ClientWorld instance, long timeOfDay)
     {
-        WorldTimer worldTimer = WorldTimer.getWorldTimer(this.getRegistryKey());
+        CycleTimer cycleTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
 
-        if (worldTimer == null)
+        if (cycleTimer == null)
             return;
 
-        long currentTimeOfDay = (long) (worldTimer.getTimePercentage() * 12000);
+        long currentTimeOfDay = (long) (cycleTimer.getTimePercentage() * 12000);
         this.clientWorldProperties.setTimeOfDay(currentTimeOfDay);
     }
 
     @Inject(method = "setTimeOfDay(J)V", at = @At("HEAD"))
     protected void setTimeOfDay(long timeOfDay, CallbackInfo info)
     {
-        WorldTimer worldTimer = WorldTimer.getWorldTimer(this.getRegistryKey());
+        CycleTimer cycleTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
 
-        if (worldTimer == null)
+        if (cycleTimer == null)
             return;
 
         long timeDelta = timeOfDay - this.getTimeOfDay();
 
-        timeDelta = worldTimer.convertToRW(timeDelta);
-        worldTimer.advanceRainTimer(timeDelta);
+        timeDelta = cycleTimer.convertToRW(timeDelta);
+        cycleTimer.advanceRainTimer(timeDelta);
     }
 }

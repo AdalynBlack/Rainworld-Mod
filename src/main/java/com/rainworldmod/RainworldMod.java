@@ -1,9 +1,9 @@
 package com.rainworldmod;
 
 import com.rainworldmod.mechanics.CycleTimerCommand;
-import com.rainworldmod.mechanics.WorldTimer;
-import com.rainworldmod.networking.RequestWorldTimer;
-import com.rainworldmod.networking.SyncWorldTimer;
+import com.rainworldmod.mechanics.CycleTimer;
+import com.rainworldmod.networking.RequestCycleTimer;
+import com.rainworldmod.networking.SyncCycleTimer;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -21,12 +21,12 @@ public class RainworldMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		AllBlocks.initialize();
-		WorldTimer.initialize();
+		CycleTimer.initialize();
 
-		ServerPlayNetworking.registerGlobalReceiver(RequestWorldTimer.REQUEST_WORLD_TIMER_PACKET_ID, (server, player, handler, buf, responseSender) -> {
+		ServerPlayNetworking.registerGlobalReceiver(RequestCycleTimer.REQUEST_CYCLE_TIMER_PACKET_ID, (server, player, handler, buf, responseSender) -> {
 			server.execute(() -> {
-				WorldTimer worldTimer = WorldTimer.getWorldTimer(player.getWorld().getRegistryKey());
-				ServerPlayNetworking.send(player, SyncWorldTimer.SYNC_WORLD_TIMER_PACKET_ID, new SyncWorldTimer(player.getWorld().getRegistryKey(), worldTimer.cycleLength, worldTimer.cycleTimeLeft).toBuf());
+				CycleTimer worldTimer = CycleTimer.getCycleTimer(player.getWorld().getRegistryKey());
+				ServerPlayNetworking.send(player, SyncCycleTimer.SYNC_CYCLE_TIMER_PACKET_ID, new SyncCycleTimer(player.getWorld().getRegistryKey(), worldTimer.cycleLength, worldTimer.cycleTimeLeft).toBuf());
 			});
 		});
 

@@ -18,13 +18,13 @@ public class CycleTimerCommand {
                         .then(literal("minCycleTime")
                                 .then(literal("query")
                                         .executes(context -> {
-                                            final WorldTimer worldTimer = WorldTimer.getWorldTimer(context.getSource().getWorld().getRegistryKey());
+                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
                                             return worldTimer.minimumCycleTime;
                                         }))
                                 .then(argument("time", TimeArgumentType.time())
                                         .executes(context -> {
                                             final int ticks = IntegerArgumentType.getInteger(context, "time");
-                                            final WorldTimer worldTimer = WorldTimer.getWorldTimer(context.getSource().getWorld().getRegistryKey());
+                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
 
                                             worldTimer.minimumCycleTime = ticks;
                                             worldTimer.markDirty();
@@ -45,13 +45,13 @@ public class CycleTimerCommand {
                         .then(literal("maxCycleTime")
                                 .then(literal("query")
                                         .executes(context -> {
-                                            final WorldTimer worldTimer = WorldTimer.getWorldTimer(context.getSource().getWorld().getRegistryKey());
+                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
                                             return worldTimer.maximumCycleTime;
                                         }))
                                 .then(argument("time", TimeArgumentType.time())
                                         .executes(context -> {
                                             final int ticks = IntegerArgumentType.getInteger(context, "time");
-                                            final WorldTimer worldTimer = WorldTimer.getWorldTimer(context.getSource().getWorld().getRegistryKey());
+                                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
 
                                             worldTimer.maximumCycleTime = ticks;
                                             worldTimer.markDirty();
@@ -76,7 +76,7 @@ public class CycleTimerCommand {
                                                 .executes(context -> {
                                                     final int minTicks = IntegerArgumentType.getInteger(context, "minTime");
                                                     final int maxTicks = IntegerArgumentType.getInteger(context, "maxTime");
-                                                    final WorldTimer worldTimer = WorldTimer.getWorldTimer(context.getSource().getWorld().getRegistryKey());
+                                                    final CycleTimer worldTimer = CycleTimer.getCycleTimer(context.getSource().getWorld().getRegistryKey());
 
                                                     worldTimer.minimumCycleTime = minTicks;
                                                     worldTimer.maximumCycleTime = maxTicks;
@@ -102,7 +102,7 @@ public class CycleTimerCommand {
                         .requires(context -> context.hasPermissionLevel(2))
                         .executes(context -> {
                             final World world = context.getSource().getWorld();
-                            final WorldTimer worldTimer = WorldTimer.getWorldTimer(world.getRegistryKey());
+                            final CycleTimer worldTimer = CycleTimer.getCycleTimer(world.getRegistryKey());
                             worldTimer.SelectNextRainTime(world);
                             return 1;
                         }))));

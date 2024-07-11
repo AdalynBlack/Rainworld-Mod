@@ -9,20 +9,20 @@ import net.minecraft.world.World;
 
 import java.util.Objects;
 
-public class SyncWorldTimer {
-    public static final Identifier SYNC_WORLD_TIMER_PACKET_ID = Objects.requireNonNull(Identifier.of(RainworldMod.MOD_ID, "sync_world_timer"));
+public class SyncCycleTimer {
+    public static final Identifier SYNC_CYCLE_TIMER_PACKET_ID = Objects.requireNonNull(Identifier.of(RainworldMod.MOD_ID, "sync_world_timer"));
 
     public RegistryKey<World> worldKey;
     public int cycleLength;
     public long cycleTimeLeft;
 
-    public SyncWorldTimer(RegistryKey<World> world, int cycleLength, long cycleTimeLeft) {
+    public SyncCycleTimer(RegistryKey<World> world, int cycleLength, long cycleTimeLeft) {
         this.worldKey = world;
         this.cycleLength = cycleLength;
         this.cycleTimeLeft = cycleTimeLeft;
     }
 
-    public SyncWorldTimer(PacketByteBuf buf)
+    public SyncCycleTimer(PacketByteBuf buf)
     {
         this.worldKey = buf.readRegistryKey(RegistryKey.ofRegistry(World.OVERWORLD.getRegistry()));
         this.cycleLength = buf.readInt();
@@ -40,15 +40,15 @@ public class SyncWorldTimer {
         return buf;
     }
 
-    public static RegistryKey<World> toWorldKey(SyncWorldTimer timer) {
+    public static RegistryKey<World> toWorldKey(SyncCycleTimer timer) {
         return timer.worldKey;
     }
 
-    public static int toCycleLength(SyncWorldTimer timer) {
+    public static int toCycleLength(SyncCycleTimer timer) {
         return timer.cycleLength;
     }
 
-    public static long toCycleTimeLeft(SyncWorldTimer timer) {
+    public static long toCycleTimeLeft(SyncCycleTimer timer) {
         return timer.cycleTimeLeft;
     }
 }

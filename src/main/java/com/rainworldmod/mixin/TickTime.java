@@ -1,6 +1,6 @@
 package com.rainworldmod.mixin;
 
-import com.rainworldmod.mechanics.WorldTimer;
+import com.rainworldmod.mechanics.CycleTimer;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -35,7 +35,7 @@ public abstract class TickTime extends World {
     @Redirect(method = "tickTime", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerWorld;setTimeOfDay(J)V"))
     protected void tickTime(ServerWorld instance, long timeOfDay)
     {
-        WorldTimer worldTimer = WorldTimer.getWorldTimer(this.getRegistryKey());
+        CycleTimer worldTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
 
         if (worldTimer == null)
             return;
@@ -48,7 +48,7 @@ public abstract class TickTime extends World {
     @Inject(method = "setTimeOfDay(J)V", at = @At("HEAD"))
     protected void setTimeOfDay(long timeOfDay, CallbackInfo info)
     {
-        WorldTimer worldTimer = WorldTimer.getWorldTimer(this.getRegistryKey());
+        CycleTimer worldTimer = CycleTimer.getCycleTimer(this.getRegistryKey());
 
         if (worldTimer == null)
             return;
