@@ -27,9 +27,4 @@ public class ShelterBlock extends FacingBlock {
     {
         builder.add(FACING);
     }
-
-    /*@Override
-    protected MapCodec<? extends FacingBlock> getCodec() {
-        return null;
-    }*/
 }

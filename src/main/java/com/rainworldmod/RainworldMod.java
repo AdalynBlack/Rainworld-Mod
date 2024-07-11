@@ -23,14 +23,6 @@ public class RainworldMod implements ModInitializer {
 		AllBlocks.initialize();
 		WorldTimer.initialize();
 
-		// 1.20.1
-		/*
-		PayloadTypeRegistry.playS2C().register(SyncWorldTimer.ID, SyncWorldTimer.CODEC);
-		PayloadTypeRegistry.playC2S().register(RequestWorldTimer.ID, RequestWorldTimer.CODEC);
-
-		ServerPlayNetworking.registerGlobalReceiver(RequestWorldTimer.ID, (payload, context) -> {
-		 */
-
 		ServerPlayNetworking.registerGlobalReceiver(RequestWorldTimer.REQUEST_WORLD_TIMER_PACKET_ID, (server, player, handler, buf, responseSender) -> {
 			server.execute(() -> {
 				WorldTimer worldTimer = WorldTimer.getWorldTimer(player.getWorld().getRegistryKey());
