@@ -21,6 +21,7 @@ public class RainworldMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		AllBlocks.initialize();
+		AllBlockEntities.initialize();
 		CycleTimer.initialize();
 
 		ServerPlayNetworking.registerGlobalReceiver(RequestCycleTimer.REQUEST_CYCLE_TIMER_PACKET_ID, (server, player, handler, buf, responseSender) -> {

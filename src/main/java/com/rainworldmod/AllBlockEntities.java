@@ -12,4 +12,6 @@ public class AllBlockEntities {
             new Identifier(RainworldMod.MOD_ID, "shelter_block_entity"),
             BlockEntityType.Builder.create(ShelterBlockEntity::new, AllBlocks.SHELTER_BLOCK).build(null)
     );
+
+    public static void initialize() {}
 }
