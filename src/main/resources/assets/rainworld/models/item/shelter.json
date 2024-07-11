@@ -1,0 +1,30 @@
+{
+  "parent": "rainworld:block/cc_5x6",
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 0, 0],
+      "scale": [0.2, 0.2, 0.2]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 0, 0],
+      "scale": [0.2, 0.2, 0.2]
+    },
+    "firstperson_righthand": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 0, 0],
+      "scale": [0.2, 0.2, 0.2]
+    },
+    "firstperson_lefthand": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 0, 0],
+      "scale": [0.2, 0.2, 0.2]
+    },
+    "gui": {
+      "rotation": [0, 0, 0],
+      "translation": [0, 0, 0],
+      "scale": [0.2, 0.2, 0.2]
+    }
+  }
+}

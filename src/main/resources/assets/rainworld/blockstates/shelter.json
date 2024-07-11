@@ -1,0 +1,26 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "rainworld:block/cc_5x6",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "rainworld:block/cc_5x6_side"
+    },
+    "facing=north": {
+      "model": "rainworld:block/cc_5x6_side",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "rainworld:block/cc_5x6_side",
+      "y": 90
+    },
+    "facing=up": {
+      "model": "rainworld:block/cc_5x6"
+    },
+    "facing=west": {
+      "model": "rainworld:block/cc_5x6_side",
+      "y": 180
+    }
+  }
+}
