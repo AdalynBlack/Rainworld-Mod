@@ -12,8 +12,7 @@ public class ShelterBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {
-    }
+    public void readNbt(NbtCompound nbt) {}
 
     @Override
     public void writeNbt(NbtCompound nbt) {}
