@@ -13,10 +13,10 @@ public class RainworldModClient implements ClientModInitializer {
 
 		ClientPlayNetworking.registerGlobalReceiver(SyncWorldTimer.SYNC_WORLD_TIMER_PACKET_ID, (client, handler, buf, responseSender) -> {
 			client.execute(() -> {
-				SyncWorldTimer worldTimerPaylod = new SyncWorldTimer(buf);
-				WorldTimer worldTimer = WorldTimer.getWorldTimer(worldTimerPaylod.worldKey);
-				worldTimer.cycleTimeLeft = worldTimerPaylod.cycleTimeLeft;
-				worldTimer.cycleLength = worldTimerPaylod.cycleLength;
+				SyncWorldTimer worldTimerPayload = new SyncWorldTimer(buf);
+				WorldTimer worldTimer = WorldTimer.getWorldTimer(worldTimerPayload.worldKey);
+				worldTimer.cycleTimeLeft = worldTimerPayload.cycleTimeLeft;
+				worldTimer.cycleLength = worldTimerPayload.cycleLength;
 			});
 		});
 	}
