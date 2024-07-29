@@ -12,7 +12,6 @@ import net.minecraft.world.World;
 import java.util.List;
 
 public class CycleSleep implements CycleTicker {
-
     private boolean sleepingThroughCycle = false;
     private boolean hasLockedShelters = false;
     private boolean hasShownKarma = false;
