@@ -21,6 +21,16 @@ public class Easing {
         return 1 - (normalizedProgress * normalizedProgress) / 2;
     }
 
+    public static double easeInCubic(double normalizedProgress)
+    {
+        if (normalizedProgress >= 1)
+            return 1;
+        if (normalizedProgress <= 0)
+            return 0;
+
+        return normalizedProgress * normalizedProgress * normalizedProgress;
+    }
+
     public static double easeOutCubic(double normalizedProgress)
     {
         if (normalizedProgress >= 1)

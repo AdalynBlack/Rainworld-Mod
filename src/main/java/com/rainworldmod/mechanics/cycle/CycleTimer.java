@@ -2,6 +2,7 @@ package com.rainworldmod.mechanics.cycle;
 
 import com.rainworldmod.RainworldMod;
 import com.rainworldmod.mechanics.rain.RainTicker;
+import com.rainworldmod.mechanics.sleep.CycleSleep;
 import com.rainworldmod.networking.SyncCycleTimer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
@@ -32,8 +33,11 @@ public class CycleTimer extends PersistentState {
 
     public RegistryKey<World> world;
 
-    private static final List<Supplier<CycleTicker>> cycleTickerProviders = List.of(RainTicker::new);
-    public List<CycleTicker> cycleTickers = new ArrayList<>(cycleTickerProviders.size());
+    private static final List<Supplier<CycleTicker>> cycleTickerProviders = List.of(
+            RainTicker::new,
+            CycleSleep::new);
+
+    private final List<CycleTicker> cycleTickers = new ArrayList<>(cycleTickerProviders.size());
 
     private boolean firstTimeSetHappened = false;
 
@@ -49,9 +53,16 @@ public class CycleTimer extends PersistentState {
         this.minimumCycleTime = minimumCycleTime;
         this.maximumCycleTime = maximumCycleTime;
 
-        cycleTickerProviders.forEach((cycleTickerSupplier -> {
-            cycleTickers.add(cycleTickerSupplier.get());
-        }));
+        cycleTickerProviders.forEach((cycleTickerSupplier ->
+                cycleTickers.add(cycleTickerSupplier.get())));
+    }
+
+    public void reset(World world)
+    {
+        selectNextCycleLength(world);
+
+        cycleTickers.forEach((cycleTicker ->
+                cycleTicker.reset(this, world)));
     }
 
     public float getTimePercentage()
@@ -89,7 +100,7 @@ public class CycleTimer extends PersistentState {
         this.markDirty();
     }
 
-    public void selectNextCycleLength(World world) {
+    private void selectNextCycleLength(World world) {
         this.cycleLength = world.getRandom().nextBetween(minimumCycleTime, maximumCycleTime);
         this.cycleTimeLeft = this.cycleLength;
 
@@ -98,8 +109,10 @@ public class CycleTimer extends PersistentState {
 
     private static void worldStartTick(World world) {
         CycleTimer cycleTimer = CYCLE_TIMERS.get(world.getRegistryKey());
-        if (cycleTimer.getTimePercentage() > 1.5)
+
+        if (world.getPlayers().isEmpty())
             return;
+
         if (!world.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE))
             return;
 
@@ -107,9 +120,8 @@ public class CycleTimer extends PersistentState {
 
         cycleTimer.markDirty();
 
-        cycleTimer.cycleTickers.forEach(cycleTicker -> {
-            cycleTicker.onCycleTick(cycleTimer, world);
-        });
+        cycleTimer.cycleTickers.forEach(cycleTicker ->
+                cycleTicker.onCycleTick(cycleTimer, world));
     }
 
     public static CycleTimerRequester cycleTimerRequester;

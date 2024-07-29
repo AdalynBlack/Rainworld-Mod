@@ -3,17 +3,30 @@ package com.rainworldmod.mechanics.sun;
 import com.rainworldmod.mechanics.Easing;
 
 public class SunAnimator {
-    private static final long DAWN_SUN_TIME = 1000;
-    private static final long MID_CYCLE_START_TIME = 3500;
-    private static final long MID_CYCLE_END_TIME = 7500;
-    private static final long MIDNIGHT_SUN_TIME = 18000;
+    public static final long DAWN_SUN_TIME = 1000;
+    public static final long MID_CYCLE_START_TIME = 3500;
+    public static final long MID_CYCLE_END_TIME = 7500;
+    public static final long NIGHT_CYCLE_START_TIME = 12000 + MID_CYCLE_START_TIME;
+    public static final long NIGHT_CYCLE_END_TIME = 12000 + MID_CYCLE_END_TIME;
+    public static final long PRE_CYCLE_SUN_TIME = NIGHT_CYCLE_END_TIME - 24000;
 
-    private static final double MID_CYCLE_START = 0.1;
-    private static final double MID_CYCLE_END = 1.0;
-    private static final double MIDNIGHT_SUN_START = 1.2;
+    public static final double MID_CYCLE_START = 0.1;
+    public static final double MID_CYCLE_END = 1.0;
+    public static final double NIGHT_CYCLE_START = 1.025;
+    public static final double NIGHT_CYCLE_END = 1.05;
+    public static final double PRE_CYCLE_START = -0.05;
 
     public static long getSimulatedTimeOfDay(float timePercentage)
     {
+        if (timePercentage < 0)
+            return (long) (Easing.mapValue(
+                    Easing.easeInCubic(Easing.mapValue(
+                            timePercentage,
+                            PRE_CYCLE_START, 0,
+                            0, 1)),
+                    0, 1,
+                    PRE_CYCLE_SUN_TIME, DAWN_SUN_TIME) + 24000) % 24000;
+
         if (timePercentage < MID_CYCLE_START)
             return (long) Easing.mapValue(
                     Easing.easeOutCubic(Easing.mapValue(
@@ -32,15 +45,24 @@ public class SunAnimator {
                     0, 1,
                     MID_CYCLE_START_TIME, MID_CYCLE_END_TIME);
 
-        if (timePercentage < MIDNIGHT_SUN_START)
+        if (timePercentage < NIGHT_CYCLE_START)
             return (long) Easing.mapValue(
                     Easing.easeInOutCubic(Easing.mapValue(
                             timePercentage,
-                            MID_CYCLE_END, MIDNIGHT_SUN_START,
+                            MID_CYCLE_END, NIGHT_CYCLE_START,
                             0, 1)),
                     0, 1,
-                    MID_CYCLE_END_TIME, MIDNIGHT_SUN_TIME);
+                    MID_CYCLE_END_TIME, NIGHT_CYCLE_START_TIME);
 
-        return MIDNIGHT_SUN_TIME;
+        if (timePercentage < NIGHT_CYCLE_END)
+            return (long) Easing.mapValue(
+                    Easing.easeInOutCubic(Easing.mapValue(
+                            timePercentage,
+                            NIGHT_CYCLE_START, NIGHT_CYCLE_END,
+                            0, 1)),
+                    0, 1,
+                    NIGHT_CYCLE_START_TIME, NIGHT_CYCLE_END_TIME);
+
+        return NIGHT_CYCLE_END_TIME;
     }
 }

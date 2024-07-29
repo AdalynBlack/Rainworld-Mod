@@ -105,7 +105,7 @@ public class CycleTimerCommand {
                         .executes(context -> {
                             final World world = context.getSource().getWorld();
                             final CycleTimer cycleTimer = CycleTimer.getCycleTimer(world.getRegistryKey());
-                            cycleTimer.selectNextCycleLength(world);
+                            cycleTimer.reset(world);
                             return 1;
                         }))));
     }
