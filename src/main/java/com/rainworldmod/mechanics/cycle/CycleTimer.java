@@ -33,11 +33,9 @@ public class CycleTimer extends PersistentState {
 
     public RegistryKey<World> world;
 
-    private static final List<Supplier<CycleTicker>> cycleTickerProviders = List.of(
-            RainTicker::new,
-            CycleSleep::new);
+    private static final List<Supplier<CycleTicker>> CYCLE_TICKER_PROVIDERS = new ArrayList<>();
 
-    private final List<CycleTicker> cycleTickers = new ArrayList<>(cycleTickerProviders.size());
+    private final List<CycleTicker> cycleTickers = new ArrayList<>(CYCLE_TICKER_PROVIDERS.size());
 
     private boolean firstTimeSetHappened = false;
 
@@ -53,8 +51,17 @@ public class CycleTimer extends PersistentState {
         this.minimumCycleTime = minimumCycleTime;
         this.maximumCycleTime = maximumCycleTime;
 
-        cycleTickerProviders.forEach((cycleTickerSupplier ->
+        CYCLE_TICKER_PROVIDERS.forEach((cycleTickerSupplier ->
                 cycleTickers.add(cycleTickerSupplier.get())));
+    }
+
+    public static void registerCycleTicker(Supplier<CycleTicker> cycleTickerProvider)
+    {
+        CYCLE_TICKER_PROVIDERS.add(cycleTickerProvider);
+
+        CYCLE_TIMERS.values().forEach((cycleTimer) -> {
+            cycleTimer.cycleTickers.add(cycleTickerProvider.get());
+        });
     }
 
     public void reset(World world)
@@ -130,6 +137,9 @@ public class CycleTimer extends PersistentState {
         ServerWorldEvents.LOAD.register(CycleTimer::load);
         ServerWorldEvents.UNLOAD.register(CycleTimer::unload);
         ServerTickEvents.START_WORLD_TICK.register(CycleTimer::worldStartTick);
+
+        registerCycleTicker(CycleSleep::new);
+        registerCycleTicker(RainTicker::new);
     }
 
     private static void load(MinecraftServer minecraftServer, World world) {
