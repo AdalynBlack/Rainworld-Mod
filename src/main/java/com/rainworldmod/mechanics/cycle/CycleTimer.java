@@ -41,11 +41,11 @@ public class CycleTimer extends PersistentState {
 
     private static final HashMap<RegistryKey<World>, CycleTimer> CYCLE_TIMERS = new HashMap<>();
 
-    public CycleTimer() {
+    private CycleTimer() {
         this(-1, -1, 20*60*9, 20*60*15);
     }
 
-    public CycleTimer(int cycleLength, long cycleTimeLeft, int minimumCycleTime, int maximumCycleTime) {
+    private CycleTimer(int cycleLength, long cycleTimeLeft, int minimumCycleTime, int maximumCycleTime) {
         this.cycleLength = cycleLength;
         this.cycleTimeLeft = cycleTimeLeft;
         this.minimumCycleTime = minimumCycleTime;
