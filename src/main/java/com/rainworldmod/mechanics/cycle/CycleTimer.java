@@ -41,6 +41,98 @@ public class CycleTimer extends PersistentState {
 
     private static final HashMap<RegistryKey<World>, CycleTimer> CYCLE_TIMERS = new HashMap<>();
 
+    public final RainTicker rainTicker;
+    public final CycleSleep cycleSleep;
+
+    /**
+     * Register a CycleTicker provider.
+     * This provider will be instantiated for all future CycleTimers,
+     * and will be automatically instantiated for all existing CycleTimers
+     * @param cycleTickerProvider The cycle ticker provider to register, usually CycleTicker::new
+     */
+    public static void registerCycleTicker(Supplier<CycleTicker> cycleTickerProvider)
+    {
+        CYCLE_TICKER_PROVIDERS.add(cycleTickerProvider);
+
+        CYCLE_TIMERS.values().forEach((cycleTimer) -> {
+            cycleTimer.cycleTickers.add(cycleTickerProvider.get());
+        });
+    }
+
+    /**
+     * Starts a new cycle, and propagates that message to all registered cycleTickers
+     * @param world
+     */
+    public void startOfCycle(World world)
+    {
+        selectNextCycleLength(world);
+
+        cycleTickers.forEach((cycleTicker ->
+                cycleTicker.startOfCycle(this, world)));
+    }
+
+    /**
+     * @return A float value normalized such that 0 represents the beginning of the current cycle,
+     * and 1 represents the beginning of rain falling. The return value may be less than 0 before a cycle,
+     * and greater than 1 after the rain begins
+     */
+    public float getTimePercentage()
+    {
+        return 1 - ((float) cycleTimeLeft / cycleLength);
+    }
+
+    /**
+     * Gets the CycleTimer associated with the provided world registry key
+     * @param world
+     * @return
+     */
+    public static CycleTimer getCycleTimer(RegistryKey<World> world) {
+        return CYCLE_TIMERS.get(world);
+    }
+
+    /**
+     * @return A value representing how fast the current cycle will pass, relative to a typical Minecraft day
+     */
+    public float getTimeMultiplier()
+    {
+        return 12000f / this.cycleLength;
+    }
+
+    /**
+     * Converts an MC time value to a RW time value based on the current timesscale
+     * @param mcTime
+     * @return
+     */
+    public long convertToRW(long mcTime)
+    {
+        return (long) (mcTime / getTimeMultiplier());
+    }
+
+    /**
+     * Converts a RW time value to an MC time value based on the current timescale
+     * @param rwTime
+     * @return
+     */
+    public long convertToMC(long rwTime)
+    {
+        return (long) (rwTime * getTimeMultiplier());
+    }
+
+    /**
+     * Increments the current cycle by a certain number of ticks
+     * @param rwTimeDelta
+     */
+    public void advanceCycleTimer(long rwTimeDelta)
+    {
+        if (!firstTimeSetHappened) {
+            firstTimeSetHappened = true;
+            return;
+        }
+
+        this.cycleTimeLeft += rwTimeDelta;
+        this.markDirty();
+    }
+
     private CycleTimer() {
         this(-1, -1, 20*60*9, 20*60*15);
     }
@@ -53,58 +145,9 @@ public class CycleTimer extends PersistentState {
 
         CYCLE_TICKER_PROVIDERS.forEach((cycleTickerSupplier ->
                 cycleTickers.add(cycleTickerSupplier.get())));
-    }
 
-    public static void registerCycleTicker(Supplier<CycleTicker> cycleTickerProvider)
-    {
-        CYCLE_TICKER_PROVIDERS.add(cycleTickerProvider);
-
-        CYCLE_TIMERS.values().forEach((cycleTimer) -> {
-            cycleTimer.cycleTickers.add(cycleTickerProvider.get());
-        });
-    }
-
-    public void reset(World world)
-    {
-        selectNextCycleLength(world);
-
-        cycleTickers.forEach((cycleTicker ->
-                cycleTicker.reset(this, world)));
-    }
-
-    public float getTimePercentage()
-    {
-        return 1 - ((float) cycleTimeLeft / cycleLength);
-    }
-
-    public static CycleTimer getCycleTimer(RegistryKey<World> world) {
-        return CYCLE_TIMERS.get(world);
-    }
-
-    public float getTimeMultiplier()
-    {
-        return 12000f / this.cycleLength;
-    }
-
-    public long convertToRW(long mcTime)
-    {
-        return (long) (mcTime / getTimeMultiplier());
-    }
-
-    public long convertToMC(long rwTime)
-    {
-        return (long) (rwTime * getTimeMultiplier());
-    }
-
-    public void advanceCycleTimer(long rwTimeDelta)
-    {
-        if (!firstTimeSetHappened) {
-            firstTimeSetHappened = true;
-            return;
-        }
-
-        this.cycleTimeLeft += rwTimeDelta;
-        this.markDirty();
+        this.cycleSleep = (CycleSleep) cycleTickers.get(0);
+        this.rainTicker = (RainTicker) cycleTickers.get(1);
     }
 
     private void selectNextCycleLength(World world) {

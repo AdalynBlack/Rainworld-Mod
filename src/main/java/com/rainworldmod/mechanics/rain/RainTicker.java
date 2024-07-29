@@ -62,7 +62,7 @@ public class RainTicker implements CycleTicker {
     }
 
     @Override
-    public void reset(CycleTimer cycleTimer, World world) {
+    public void startOfCycle(CycleTimer cycleTimer, World world) {
         rainFactor = 0;
     }
 

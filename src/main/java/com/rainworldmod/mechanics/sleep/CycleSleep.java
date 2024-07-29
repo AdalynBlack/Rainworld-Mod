@@ -70,11 +70,11 @@ public class CycleSleep implements CycleTicker {
         if (!isKarmaDone())
             return;
 
-        cycleTimer.reset(world);
+        cycleTimer.startOfCycle(world);
         cycleTimer.cycleTimeLeft -= (long) (SunAnimator.PRE_CYCLE_START * cycleTimer.cycleLength);
     }
 
-    public void reset(CycleTimer cycleTimer, World world)
+    public void startOfCycle(CycleTimer cycleTimer, World world)
     {
         this.sleepingThroughCycle = false;
         this.hasShownKarma = false;
