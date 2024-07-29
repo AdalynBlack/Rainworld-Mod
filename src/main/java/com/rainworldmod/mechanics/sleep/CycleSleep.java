@@ -5,7 +5,6 @@ import com.rainworldmod.mechanics.cycle.CycleTicker;
 import com.rainworldmod.mechanics.cycle.CycleTimer;
 import com.rainworldmod.mechanics.rain.RainTicker;
 import com.rainworldmod.mechanics.sun.SunAnimator;
-import net.minecraft.entity.mob.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.world.World;
@@ -63,7 +62,6 @@ public class CycleSleep implements CycleTicker {
         if (cycleTimer.cycleTimeLeft == RainTicker.DEATH_RAIN_TIME)
             world.getPlayers().forEach((player)->
                     player.sendMessage(Text.literal("Death rain has triggered!")));
-        CreeperEntity
         if (cycleTimer.cycleTimeLeft > RainTicker.DEATH_RAIN_TIME - 20 * 10)
             return;
 
