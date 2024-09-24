@@ -143,9 +143,9 @@ public class CycleTimer extends PersistentState {
         this.minimumCycleTime = minimumCycleTime;
         this.maximumCycleTime = maximumCycleTime;
 
-	if ((this.minimumCycleTimer - this.maximumCycleTimer) >= 0) {
-		this.minimumCycleTimer = 120 * 20;
-		this.maximumCycleTimer = 240 * 20;
+	if ((this.minimumCycleTime - this.maximumCycleTime) >= 0) {
+		this.minimumCycleTime = 120 * 20;
+		this.maximumCycleTime = 240 * 20;
 	}
 
         CYCLE_TICKER_PROVIDERS.forEach((cycleTickerSupplier ->
