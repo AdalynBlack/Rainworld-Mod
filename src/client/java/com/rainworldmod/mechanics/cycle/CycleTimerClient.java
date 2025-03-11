@@ -9,6 +9,6 @@ import net.minecraft.world.World;
 public class CycleTimerClient extends CycleTimerRequester {
     public void requestCycleTimer(RegistryKey<World> world)
     {
-        ClientPlayNetworking.send(RequestCycleTimer.REQUEST_CYCLE_TIMER_PACKET_ID, PacketByteBufs.create());
+        ClientPlayNetworking.send(new RequestCycleTimer(world));
     }
 }

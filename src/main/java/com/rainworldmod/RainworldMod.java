@@ -6,7 +6,9 @@ import com.rainworldmod.networking.RequestCycleTimer;
 import com.rainworldmod.networking.SyncCycleTimer;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.server.network.ServerPlayerEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,12 +26,14 @@ public class RainworldMod implements ModInitializer {
 		AllBlockEntities.initialize();
 		CycleTimer.initialize();
 
-		ServerPlayNetworking.registerGlobalReceiver(RequestCycleTimer.REQUEST_CYCLE_TIMER_PACKET_ID, (server, player, handler, buf, responseSender) -> {
-			server.execute(() -> {
-				CycleTimer cycleTimer = CycleTimer.getCycleTimer(player.getWorld().getRegistryKey());
-				ServerPlayNetworking.send(player, SyncCycleTimer.SYNC_CYCLE_TIMER_PACKET_ID, new SyncCycleTimer(player.getWorld().getRegistryKey(), cycleTimer.cycleLength, cycleTimer.cycleTimeLeft).toBuf());
-			});
-		});
+		PayloadTypeRegistry.playS2C().register(SyncCycleTimer.ID, SyncCycleTimer.CODEC);
+		PayloadTypeRegistry.playC2S().register(RequestCycleTimer.ID, RequestCycleTimer.CODEC);
+
+		ServerPlayNetworking.registerGlobalReceiver(RequestCycleTimer.ID, (payload, context) -> context.server().execute(() -> {
+            ServerPlayerEntity player = context.player();
+			CycleTimer cycleTimer = CycleTimer.getCycleTimer(player.getWorld().getRegistryKey());
+            ServerPlayNetworking.send(player, new SyncCycleTimer(player.getWorld().getRegistryKey(), cycleTimer.cycleLength, cycleTimer.cycleTimeLeft));
+        }));
 
 		CycleTimerCommand.initialize();
 	}

@@ -1,5 +1,6 @@
 package com.rainworldmod.blocks.shelter;
 
+import com.mojang.serialization.MapCodec;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
@@ -32,5 +33,10 @@ public class ShelterBlock extends FacingBlock implements BlockEntityProvider {
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return new ShelterBlockEntity(pos, state);
+    }
+
+    @Override
+    protected MapCodec<? extends FacingBlock> getCodec() {
+        return null;
     }
 }

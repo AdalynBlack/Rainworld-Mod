@@ -3,14 +3,26 @@ package com.rainworldmod.networking;
 import com.rainworldmod.RainworldMod;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 
 import java.util.Objects;
 
-public class SyncCycleTimer {
+public class SyncCycleTimer implements CustomPayload {
     public static final Identifier SYNC_CYCLE_TIMER_PACKET_ID = Objects.requireNonNull(Identifier.of(RainworldMod.MOD_ID, "sync_world_timer"));
+
+    public static final CustomPayload.Id<SyncCycleTimer> ID = new CustomPayload.Id<>(SYNC_CYCLE_TIMER_PACKET_ID);
+
+    public static final PacketCodec<RegistryByteBuf, SyncCycleTimer> CODEC = PacketCodec.tuple(
+            RegistryKey.createPacketCodec(World.OVERWORLD.getRegistryRef()), SyncCycleTimer::toWorldKey,
+            PacketCodecs.VAR_INT, SyncCycleTimer::toCycleLength,
+            PacketCodecs.VAR_LONG, SyncCycleTimer::toCycleTimeLeft,
+            SyncCycleTimer::new);
 
     public RegistryKey<World> worldKey;
     public int cycleLength;
@@ -50,5 +62,10 @@ public class SyncCycleTimer {
 
     public static long toCycleTimeLeft(SyncCycleTimer timer) {
         return timer.cycleTimeLeft;
+    }
+
+    @Override
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 }

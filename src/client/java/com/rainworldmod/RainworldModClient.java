@@ -11,13 +11,10 @@ public class RainworldModClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		CycleTimer.cycleTimerRequester = new CycleTimerClient();
 
-		ClientPlayNetworking.registerGlobalReceiver(SyncCycleTimer.SYNC_CYCLE_TIMER_PACKET_ID, (client, handler, buf, responseSender) -> {
-			client.execute(() -> {
-				SyncCycleTimer cycleTimerPayload = new SyncCycleTimer(buf);
-				CycleTimer cycleTimer = CycleTimer.getCycleTimer(cycleTimerPayload.worldKey);
-				cycleTimer.cycleTimeLeft = cycleTimerPayload.cycleTimeLeft;
-				cycleTimer.cycleLength = cycleTimerPayload.cycleLength;
-			});
-		});
+		ClientPlayNetworking.registerGlobalReceiver(SyncCycleTimer.ID, (payload, context) -> context.client().execute(() -> {
+            CycleTimer cycleTimer = CycleTimer.getCycleTimer(payload.worldKey);
+            cycleTimer.cycleTimeLeft = payload.cycleTimeLeft;
+            cycleTimer.cycleLength = payload.cycleLength;
+        }));
 	}
 }

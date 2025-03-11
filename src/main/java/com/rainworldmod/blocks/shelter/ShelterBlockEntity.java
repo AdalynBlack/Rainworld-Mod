@@ -4,6 +4,7 @@ import com.rainworldmod.AllBlockEntities;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 
 public class ShelterBlockEntity extends BlockEntity {
@@ -12,8 +13,8 @@ public class ShelterBlockEntity extends BlockEntity {
     }
 
     @Override
-    public void readNbt(NbtCompound nbt) {}
+    public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {}
 
     @Override
-    public void writeNbt(NbtCompound nbt) {}
+    public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {}
 }

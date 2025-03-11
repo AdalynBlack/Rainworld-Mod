@@ -20,8 +20,8 @@ public class RainTicker implements CycleTicker {
     public static final long MAX_RAIN_TIME = -20*30;
     public static final long DEATH_RAIN_TIME = MAX_RAIN_TIME - 20*30;
 
-    private static final TagKey<Biome> SHELTER = TagKey.of(RegistryKeys.BIOME, new Identifier(RainworldMod.MOD_ID, "shelter"));
-    private static final TagKey<Biome> NO_RAIN = TagKey.of(RegistryKeys.BIOME, new Identifier(RainworldMod.MOD_ID, "no_rain"));
+    private static final TagKey<Biome> SHELTER = TagKey.of(RegistryKeys.BIOME, Identifier.of(RainworldMod.MOD_ID, "shelter"));
+    private static final TagKey<Biome> NO_RAIN = TagKey.of(RegistryKeys.BIOME, Identifier.of(RainworldMod.MOD_ID, "no_rain"));
 
     private static final Set<TagKey<Biome>> RAIN_SURVIVAL_TAGS = new HashSet<>(List.of(
             SHELTER,

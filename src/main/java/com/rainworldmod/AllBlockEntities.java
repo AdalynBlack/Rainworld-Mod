@@ -9,7 +9,7 @@ import net.minecraft.util.Identifier;
 public class AllBlockEntities {
     public static final BlockEntityType<ShelterBlockEntity> SHELTER_BLOCK_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE,
-            new Identifier(RainworldMod.MOD_ID, "shelter_block_entity"),
+            Identifier.of(RainworldMod.MOD_ID, "shelter_block_entity"),
             BlockEntityType.Builder.create(ShelterBlockEntity::new, AllBlocks.SHELTER_BLOCK).build(null)
     );
 

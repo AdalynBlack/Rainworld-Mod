@@ -9,9 +9,11 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -40,6 +42,8 @@ public class CycleTimer extends PersistentState {
     private boolean firstTimeSetHappened = false;
 
     private static final HashMap<RegistryKey<World>, CycleTimer> CYCLE_TIMERS = new HashMap<>();
+
+    private static final Type<CycleTimer> CYCLE_TIMER_TYPE = new Type<>(CycleTimer::new, CycleTimer::createFromNbt, DataFixTypes.LEVEL);
 
     public final RainTicker rainTicker;
     public final CycleSleep cycleSleep;
@@ -202,7 +206,7 @@ public class CycleTimer extends PersistentState {
             ServerWorld serverWorld = (ServerWorld) world;
 
             PersistentStateManager persistentStateManager = serverWorld.getPersistentStateManager();
-            cycleTimer = persistentStateManager.getOrCreate(CycleTimer::createFromNbt, CycleTimer::new, RainworldMod.MOD_ID);
+            cycleTimer = persistentStateManager.getOrCreate(CYCLE_TIMER_TYPE, RainworldMod.MOD_ID);
 
             if (cycleTimer.cycleLength == -1)
                 cycleTimer.selectNextCycleLength(serverWorld);
@@ -213,7 +217,7 @@ public class CycleTimer extends PersistentState {
             buf.writeLong(cycleTimer.cycleTimeLeft);
 
             for (ServerPlayerEntity player : PlayerLookup.world(serverWorld))
-                ServerPlayNetworking.send(player, SyncCycleTimer.SYNC_CYCLE_TIMER_PACKET_ID, new SyncCycleTimer(world.getRegistryKey(), cycleTimer.cycleLength, cycleTimer.cycleTimeLeft).toBuf());
+                ServerPlayNetworking.send(player, new SyncCycleTimer(world.getRegistryKey(), cycleTimer.cycleLength, cycleTimer.cycleTimeLeft));
         }
 
         CYCLE_TIMERS.put(world.getRegistryKey(), cycleTimer);
@@ -225,7 +229,7 @@ public class CycleTimer extends PersistentState {
         CYCLE_TIMERS.remove(world.getRegistryKey());
     }
 
-    public static CycleTimer createFromNbt(NbtCompound tag) {
+    public static CycleTimer createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup lookup) {
         return new CycleTimer(
                 tag.getInt("cycleLength"),
                 tag.getLong("cycleTimeLeft"),
@@ -234,7 +238,7 @@ public class CycleTimer extends PersistentState {
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup lookup) {
         nbt.putInt("cycleLength", cycleLength);
         nbt.putLong("cycleTimeLeft", cycleTimeLeft);
         nbt.putInt("minimumCycleTime", minimumCycleTime);
